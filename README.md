@@ -1,4 +1,4 @@
-# SmartFM — Assignment 3 (SWE30003)
+# SmartFM - Assignment 3 (SWE30003)
 
 Object design implementation for the SmartFM case study, refined from the
 Assignment 2 design.
@@ -36,25 +36,14 @@ App runs at http://localhost:3000
 ```
 main            protected, PR + 1 approval required
 └── dev         integration branch
-    ├── feat/order-flow
-    ├── feat/payment-flow
-    ├── feat/assignment-flow
-    ├── feat/tracking-flow
-    ├── feat/domain-classes
-    ├── feat/seed-data
-    └── feat/report
+    ├── order-flow
+    ├── payment-flow
+    ├── assignment-flow
+    ├── tracking-flow
+    ├── domain-classes
+    ├── seed-data
+    └── report
 ```
 
 ## Report
 See `docs/report/`. A2 submission is attached at `docs/A2-Submission/` (mandatory appendix).
-
-## First-time repo setup
-```bash
-git init
-git add .
-git commit -m "Initial scaffold"
-git branch -M main
-git remote add origin <YOUR_REPO_URL>
-git push -u origin main
-./setup-branches.sh
-```
