@@ -1,0 +1,85 @@
+sequenceDiagram
+    autonumber
+    actor Customer
+    actor Driver
+    participant UI_C as "Tracking Page (Customer)\n/src/app/tracking/page.tsx"
+    participant UI_D as "Driver App\n/mobile (web responsive)"
+    participant Ctrl as "SmartFMController"
+    participant TSvc as "TrackingService"
+    participant Shipment as "Shipment"
+    participant TU as "TrackingUpdate"
+    participant Notifier as "TrackingNotifier\n(Observer)"
+    participant SRepo as "ShipmentRepository"
+    participant TRepo as "TrackingUpdateRepository"
+
+    rect rgb(240, 248, 255)
+        note right of Customer: 1. Empty UI - Opens tracking page
+        Customer->>UI_C: Opens /tracking?trackingNo=TRK-001
+        UI_C->>Ctrl: trackShipment(trackingNo)
+        Ctrl->>TSvc: getTrackingHistory(trackingNo)
+        TSvc->>SRepo: findByTrackingNo(trackingNo)
+        SRepo-->>TSvc: Shipment
+        TSvc->>TRepo: findByShipmentId(shipmentId)
+        TRepo-->>TSvc: TrackingUpdate[]
+        TSvc-->>Ctrl: TrackingHistoryDTO { status, currentLocation, history[] }
+        Ctrl-->>UI_C: Data
+        UI_C-->>Customer: Renders TrackingTimeline: status badge, map placeholder, history list
+    end
+
+    rect rgb(232, 245, 233)
+        note right of Driver: 2. Correct input - Driver updates status (≤3 taps per U5)
+        Driver->>UI_D: Opens driver app, sees assigned shipment SHP-001
+        Driver->>UI_D: Tap 1: Chọn "Đã lấy hàng" (PICKED_UP)
+        UI_D->>Ctrl: addTrackingUpdate(trackingNo, status=PICKED_UP, location=GPS)
+        Ctrl->>TSvc: addUpdate(trackingNo, status, location)
+        TSvc->>SRepo: findByTrackingNo(trackingNo)
+        SRepo-->>TSvc: Shipment
+        TSvc->>Shipment: shipment.addTrackingUpdate(status, location)
+        Shipment->>TU: new TrackingUpdate(shipmentId, status, location, now())
+        TSvc->>TRepo: save(TrackingUpdate)
+        TSvc->>SRepo: save(Shipment)  %% status updated
+        TSvc->>Notifier: notifyObservers(shipmentId, update)
+        Notifier-->>UI_C: Push/SSE update (real-time)
+        TSvc-->>Ctrl: UpdateConfirmation
+        Ctrl-->>UI_D: Success toast "Đã cập nhật"
+        UI_D-->>Driver: Shows next action "Đang vận chuyển" (IN_TRANSIT)
+    end
+
+    rect rgb(255, 243, 224)
+        note right of Customer: 3. Validation - Invalid tracking number
+        Customer->>UI_C: Enters invalid TRK-999
+        UI_C->>Ctrl: trackShipment("TRK-999")
+        Ctrl->>TSvc: getTrackingHistory("TRK-999")
+        TSvc->>SRepo: findByTrackingNo("TRK-999")
+        SRepo-->>TSvc: null
+        TSvc-->>Ctrl: Error "Mã theo dõi không tồn tại"
+        Ctrl-->>UI_C: Error
+        UI_C-->>Customer: "Mã theo dõi không tồn tại. Vui lòng kiểm tra lại."
+        Customer->>UI_C: Changes mind, enters correct TRK-001 (change of mind)
+        Note right of Customer: Returns to main success flow
+    end
+
+    rect rgb(255, 235, 238)
+        note right of Driver: AF1: GPS unavailable (A23, AR5)
+        Driver->>UI_D: Tap "Đang vận chuyển"
+        UI_D->>Ctrl: addTrackingUpdate(trackingNo, IN_TRANSIT, location=null)
+        Ctrl->>TSvc: addUpdate(...)
+        TSvc->>Shipment: addTrackingUpdate(status, location)
+        alt GPS unavailable
+            Shipment->>TU: TrackingUpdate(..., location = shipment.lastKnownLocation)
+            Note right of Shipment: Falls back to last known location per A23
+        end
+    end
+
+    rect rgb(232, 245, 233)
+        note right of Customer: 5. Successful completion - DELIVERED
+        Driver->>UI_D: Tap "Đã giao" (DELIVERED)
+        UI_D->>Ctrl: addTrackingUpdate(trackingNo, DELIVERED, location)
+        Ctrl->>TSvc: addUpdate(...)
+        TSvc->>Shipment: addTrackingUpdate(DELIVERED, location)
+        Note right of Shipment: status = DELIVERED
+        TSvc->>Notifier: notifyObservers(...)
+        Notifier-->>UI_C: Real-time push
+        UI_C-->>Customer: Timeline shows DELIVERED, green badge, "Đã giao thành công"
+        Customer->>Customer: Exits page (exit/test screen)
+    end

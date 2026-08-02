@@ -1,0 +1,113 @@
+sequenceDiagram
+    autonumber
+    actor Customer
+    participant UI as "Payment Page\n(src/app/payment/page.tsx)"
+    participant Ctrl as "SmartFMController"
+    participant PSvc as "PaymentService"
+    participant InvRepo as "InvoiceRepository"
+    participant Factory as "PaymentStrategyFactory"
+    participant Strategy as "PaymentStrategy\n(Card/Cash/Transfer)"
+    participant PayRepo as "PaymentRepository"
+
+    rect rgb(240, 248, 255)
+        note right of Customer: 1. Empty UI - Opens /payment?invoiceId=INV-001
+        Customer->>UI: Opens payment page
+        UI->>Ctrl: getInvoice(invoiceId)
+        Ctrl->>PSvc: getInvoice(invoiceId)
+        PSvc->>InvRepo: findById(invoiceId)
+        InvRepo-->>PSvc: Invoice { balance, status }
+        PSvc-->>Ctrl: InvoiceDTO
+        Ctrl-->>UI: InvoiceDTO
+        UI-->>Customer: Shows PaymentForm (amount pre-filled, method dropdown)
+    end
+
+    rect rgb(232, 245, 233)
+        note right of Customer: 2. Correct input - Select method, pay
+        Customer->>UI: Selects "CARD", enters test card token
+        UI->>UI: Validates (method selected, amount > 0)
+        alt Validation fails
+            UI-->>Customer: Vietnamese error
+        else Valid
+            UI->>Ctrl: processPayment({invoiceId, method: CARD, metadata: {cardToken}})
+            Ctrl->>PSvc: pay(invoiceId, method, metadata)
+            PSvc->>InvRepo: findById(invoiceId)
+            InvRepo-->>PSvc: Invoice { balance, status }
+            alt Invoice already paid
+                PSvc-->>Ctrl: Error "Hóa đơn đã thanh toán"
+                Ctrl-->>UI: Error
+                UI-->>Customer: Inline error
+            else Unpaid
+                PSvc->>Factory: create(method)
+                Factory-->>PSvc: CardStrategy
+                PSvc->>Strategy: process(amount, metadata)
+                Strategy-->>PSvc: PaymentResult { success: true, transactionRef }
+                PSvc->>PayRepo: save(new Payment(invoiceId, amount, CARD, transactionRef))
+                PayRepo-->>PSvc: paymentId
+                PSvc->>InvRepo: findById(invoiceId)
+                InvRepo-->>PSvc: Invoice
+                Note right of PSvc: invoice.addPayment(payment) — updates balance
+                PSvc->>InvRepo: save(invoice)
+                InvRepo-->>PSvc: updated Invoice (balance=0, status=PAID)
+                PSvc-->>Ctrl: { receiptMessage: "Thanh toán 150,000 VND thành công" }
+                Ctrl-->>UI: Confirmation
+                UI-->>Customer: 5. Success - Shows receipt, "Theo dõi đơn hàng" button
+            end
+        end
+    end
+
+    rect rgb(255, 243, 224)
+        note right of Customer: 3. Validation of incorrect input
+        Customer->>UI: Submits without selecting method
+        UI-->>Customer: "Vui lòng chọn phương thức thanh toán"
+        Customer->>UI: Selects CARD, enters invalid card token
+        UI->>Ctrl: processPayment({invoiceId, method: CARD, metadata: {cardToken: "invalid"}})
+        Ctrl->>PSvc: pay(...)
+        PSvc->>InvRepo: findById(invoiceId)
+        InvRepo-->>PSvc: Invoice (unpaid)
+        PSvc->>Factory: create(CARD)
+        Factory-->>PSvc: CardStrategy
+        PSvc->>Strategy: process(amount, {cardToken: "invalid"})
+        Strategy-->>PSvc: PaymentResult { success: false, error: "Thẻ không hợp lệ" }
+        PSvc->>PayRepo: save(new Payment(invoiceId, amount, CARD, null, FAILED))
+        PSvc-->>Ctrl: Error "Thanh toán thất bại. Vui lòng thử lại."
+        Ctrl-->>UI: Error
+        UI-->>Customer: Vietnamese error message
+    end
+
+    rect rgb(232, 245, 233)
+        note right of Customer: 4. Change of mind - Switch method
+        Customer->>UI: Initially selects CARD
+        Customer->>UI: Changes mind, clicks "Tiền mặt" instead
+        UI->>UI: Resets card fields, shows cash notice
+        Customer->>UI: Confirms CASH payment
+        UI->>Ctrl: processPayment({invoiceId, method: CASH, metadata: {}})
+        Ctrl->>PSvc: pay(invoiceId, CASH, {})
+        PSvc->>InvRepo: findById(invoiceId)
+        InvRepo-->>PSvc: Invoice (unpaid)
+        PSvc->>Factory: create(CASH)
+        Factory-->>PSvc: CashStrategy
+        PSvc->>Strategy: process(amount, {})
+        Strategy-->>PSvc: PaymentResult { success: true, transactionRef: "CASH-..." }
+        PSvc->>PayRepo: save(new Payment(invoiceId, amount, CASH, transactionRef))
+        PSvc->>InvRepo: save(invoice)
+        PSvc-->>Ctrl: { receiptMessage: "Thanh toán tiền mặt 150,000 VND thành công" }
+        Ctrl-->>UI: Confirmation
+        UI-->>Customer: Shows receipt message
+    end
+
+    rect rgb(255, 235, 238)
+        note right of Customer: AF1: Payment declined (expired card)
+        Customer->>UI: Enters expired/declined card
+        UI->>Ctrl: processPayment({method: CARD, metadata: {cardToken: "expired"}})
+        Ctrl->>PSvc: pay(...)
+        PSvc->>InvRepo: findById(invoiceId)
+        InvRepo-->>PSvc: Invoice (unpaid)
+        PSvc->>Factory: create(CARD)
+        Factory-->>PSvc: CardStrategy
+        PSvc->>Strategy: process(amount, {cardToken: "expired"})
+        Strategy-->>PSvc: PaymentResult { success: false, error: "Thẻ hết hạn" }
+        PSvc->>PayRepo: save(new Payment(..., FAILED))
+        PSvc-->>Ctrl: "Thanh toán thất bại. Vui lòng thử lại hoặc chọn phương thức khác."
+        Ctrl-->>UI: Error
+        UI-->>Customer: Vietnamese error, can retry or change method
+    end
