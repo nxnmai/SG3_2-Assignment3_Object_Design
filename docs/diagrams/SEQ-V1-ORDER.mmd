@@ -1,0 +1,92 @@
+sequenceDiagram
+    autonumber
+    actor Customer
+    participant UI as "Orders Page\n(src/app/orders/page.tsx)"
+    participant Ctrl as "SmartFMController"
+    participant OSvc as "OrderService"
+    participant CustRepo as "CustomerRepository"
+    participant OrdRepo as "OrderRepository"
+    participant InvRepo as "InvoiceRepository"
+    participant ShpRepo as "ShipmentRepository"
+
+    rect rgb(240, 248, 255)
+        note right of Customer: 1. Empty UI - Home screen loads
+        Customer->>UI: Opens /orders
+        UI-->>Customer: Displays empty search form + offerings list
+    end
+
+    rect rgb(232, 245, 233)
+        note right of Customer: 2. Correct input - Search
+        Customer->>UI: Enters origin, destination, date, goods type, weight
+        UI->>UI: Validates (required, date ≥ today, weight > 0)
+        alt Validation fails
+            UI-->>Customer: Shows Vietnamese error (validationMessages.ts)
+        else Validation passes
+            UI->>Ctrl: browseOfferings(criteria)
+            Ctrl->>OSvc: searchOfferings(criteria)
+            OSvc-->>Ctrl: Offering[] (mock/filtered from seed data)
+            Ctrl-->>UI: Offering[]
+            UI-->>Customer: Displays matching offerings (OrderCard.tsx)
+        end
+    end
+
+    rect rgb(255, 243, 224)
+        note right of Customer: 3. Validation of incorrect input
+        Customer->>UI: Submits empty / invalid form
+        UI->>UI: Runs validators
+        UI-->>Customer: "Vui lòng nhập điểm đi và điểm đến." (Origin/dest required)
+        Customer->>UI: Enters weight = -5
+        UI->>UI: Re-validates
+        UI-->>Customer: "Trọng lượng phải lớn hơn 0." (Weight > 0)
+        Customer->>UI: Corrects all input (change of mind)
+        UI->>UI: Re-validates
+        UI-->>Customer: Form valid, proceeds
+    end
+
+    rect rgb(232, 245, 233)
+        note right of Customer: 4. Place Order (Customer selects offering)
+        Customer->>UI: Clicks "Đặt hàng" on offering
+        UI->>UI: Shows order detail + goods form
+        Customer->>UI: Enters goods description, weight, dimensions
+        UI->>UI: Validates (required, weight > 0)
+        alt Invalid
+            UI-->>Customer: Vietnamese error messages
+        else Valid
+            UI->>Ctrl: placeOrder({customerId, offeringId, goodsDetails})
+            Ctrl->>OSvc: createOrder(customerId, offeringId, goodsDetails)
+            OSvc->>CustRepo: findById(customerId)
+            CustRepo-->>OSvc: Customer
+            OSvc->>OrdRepo: save(new Order(customerId, offeringId, goodsDetails))
+            OrdRepo-->>OSvc: orderId
+            OSvc->>InvRepo: save(new Invoice(orderId, calculatedAmount))
+            InvRepo-->>OSvc: invoiceId
+            OSvc->>ShpRepo: save(new Shipment(orderId, origin, destination, weight, vehicleType))
+            ShpRepo-->>OSvc: shipmentId
+            OSvc-->>Ctrl: OrderConfirmationDTO { orderId, invoiceId, shipmentId, amount }
+            Ctrl-->>UI: Confirmation
+            UI-->>Customer: 5. Success - Shows order ref, amount, "Chờ thanh toán"
+        end
+    end
+
+    %% Alternate Flows
+    rect rgb(255, 235, 238)
+        note right of Customer: AF1: No suitable offering found
+        Customer->>UI: Search with rare criteria
+        UI->>Ctrl: browseOfferings(criteria)
+        Ctrl->>OSvc: searchOfferings(criteria)
+        OSvc-->>Ctrl: []
+        Ctrl-->>UI: []
+        UI-->>Customer: "Không tìm thấy gói dịch vụ phù hợp. Thử thay đổi tiêu chí."
+    end
+
+    rect rgb(255, 235, 238)
+        note right of Customer: AF2: Customer not registered
+        Customer->>UI: Clicks "Đặt hàng" without login
+        UI-->>Customer: "Vui lòng đăng ký/đăng nhập để đặt hàng."
+        Customer->>UI: Registers (T4 flow)
+        UI->>Ctrl: registerCustomer({name, phone, email, address})
+        Ctrl->>CustRepo: save(new Customer(...))
+        CustRepo-->>Ctrl: Customer
+        Ctrl-->>UI: Customer
+        UI-->>Customer: Auto-fills profile, continues to order
+    end
