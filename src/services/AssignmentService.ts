@@ -18,7 +18,7 @@ export class AssignmentService {
         return this.shipmentRepository.findPaidUnassigned();
     }
 
-    private async findAvailableVehicle(
+    async recommendVehicles(
         branchId: string,
         shipment: Shipment
     ): Promise<Vehicle | null> {
@@ -40,7 +40,7 @@ export class AssignmentService {
         );
     }
 
-    private async findAvailableDriver(
+    async recommendDrivers(
         branchId: string,
         vehicle: Vehicle
     ): Promise<Driver | null> {
@@ -53,7 +53,8 @@ export class AssignmentService {
 
     async assignShipment(
         shipmentId: string,
-        branchId: string
+        vehicleId: string,
+        driverId: string
     ): Promise<Shipment> {
 
         const shipment =
@@ -64,20 +65,43 @@ export class AssignmentService {
         }
 
         const vehicle =
-            await this.findAvailableVehicle(branchId, shipment);
+            await this.vehicleRepository.findById(vehicleId);
 
         if (!vehicle) {
-            throw new Error(
-                "No suitable vehicle available."
-            );
+            throw new Error("Vehicle not found.");
         }
 
         const driver =
-            await this.findAvailableDriver(branchId, vehicle);
+            await this.driverRepository.findById(driverId);
 
         if (!driver) {
+            throw new Error("Driver not found.");
+        }
+
+        if (!vehicle.isAvailable()) {
+            throw new Error("Vehicle is unavailable.");
+        }
+
+        if (!driver.isAvailable()) {
+            throw new Error("Driver is unavailable.");
+        }
+
+        if (
+            !driver.isQualifiedFor(vehicle.type)
+        ) {
             throw new Error(
-                "No qualified driver available."
+                "Driver is not qualified for this vehicle."
+            );
+        }
+
+        if (
+            !vehicle.canCarry(
+                shipment.weight,
+                shipment.volume
+            )
+        ) {
+            throw new Error(
+                "Vehicle capacity is insufficient."
             );
         }
 
@@ -91,7 +115,9 @@ export class AssignmentService {
         shipment.assign(vehicle, driver);
 
         await this.vehicleRepository.save(vehicle);
+
         await this.driverRepository.save(driver);
+
         await this.shipmentRepository.save(shipment);
 
         return shipment;
