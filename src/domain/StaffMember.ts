@@ -13,7 +13,7 @@ export interface Credentials {
     password: string;
 }
 
-export abstract class StaffMember {
+export class StaffMember {
     public readonly id: string;
     public branchId: string;
     public name: string;
