@@ -1,1 +1,26 @@
-[]
+[
+    {
+        "id": "BR-HCM",
+        "name": "Ho Chi Minh Branch",
+        "address": "10 Nguyen Hue, Ho Chi Minh City",
+        "vehicleIds": ["VEH-001", "VEH-002", "VEH-003"],
+        "staffIds": ["STF-001", "STF-002", "STF-003"],
+        "driverIds": ["DRV-001", "DRV-002", "DRV-003"]
+    },
+    {
+        "id": "BR-HN",
+        "name": "Ha Noi Branch",
+        "address": "112 Ba Trieu, Ha Noi",
+        "vehicleIds": ["VEH-004", "VEH-005"],
+        "staffIds": ["STF-004", "STF-005", "STF-006"],
+        "driverIds": ["DRV-004", "DRV-005"]
+    },
+    {
+        "id": "BR-DN",
+        "name": "Da Nang Branch",
+        "address": "25 Bach Dang, Da Nang",
+        "vehicleIds": ["VEH-006", "VEH-007"],
+        "staffIds": ["STF-007", "STF-008", "STF-009"],
+        "driverIds": ["DRV-006", "DRV-007"]
+    }
+]
