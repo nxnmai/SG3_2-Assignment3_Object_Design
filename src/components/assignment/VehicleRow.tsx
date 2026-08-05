@@ -5,7 +5,7 @@ import {
   Vehicle,
   VehicleStatus,
   VehicleType,
-} from '@/domain/Vehicle'
+} from '../../domain/Vehicle'
 
 interface VehicleRowProps {
   vehicle: Vehicle

@@ -3,29 +3,23 @@
 import { Shipment, ShipmentStatus } from '../domain/Shipment';
 import { TrackingSource, TrackingUpdate } from '../domain/TrackingUpdate';
 import { ShipmentRepository } from '../repositories/ShipmentRepository';
-import { generateId } from '../utils/idGenerator';
-
-export interface TrackingUpdateRepositoryLike {
-  findByShipmentId(shipmentId: string): Promise<TrackingUpdate[]>;
-  save(update: TrackingUpdate): Promise<void>;
-}
+import { TrackingNotifier } from '../domain/TrackingNotifier';
 
 export interface TrackingHistory {
   shipment: Shipment;
   status: ShipmentStatus;
   currentLocation: string;
   history: TrackingUpdate[];
-}
-
-export interface TrackingNotifierLike {
-  notifyObservers(shipmentId: string, update: TrackingUpdate): void | Promise<void>;
+  trackingNo: string;
+  origin: string;
+  destination: string;
+  shipmentId: string;
 }
 
 export class TrackingService {
   constructor(
-    private readonly shipmentRepository: ShipmentRepository,
-    private readonly trackingUpdateRepository?: TrackingUpdateRepositoryLike,
-    private readonly trackingNotifier?: TrackingNotifierLike,
+    private readonly shipmentRepository: ShipmentRepository = new ShipmentRepository(),
+    private readonly trackingNotifier: TrackingNotifier = TrackingNotifier.getInstance(),
   ) {}
 
   async getTrackingHistory(trackingNo: string): Promise<TrackingHistory> {
@@ -38,12 +32,14 @@ export class TrackingService {
       throw new Error('Mã theo dõi không tồn tại.');
     }
 
-    const history = this.trackingUpdateRepository
-      ? await this.trackingUpdateRepository.findByShipmentId(shipment.id)
-      : shipment.getTrackingHistory();
+    const history = shipment.getTrackingHistory();
 
     return {
       shipment,
+      shipmentId: shipment.id,
+      trackingNo: shipment.trackingNo,
+      origin: shipment.origin,
+      destination: shipment.destination,
       status: shipment.getCurrentStatus(),
       currentLocation: shipment.getLatestLocation(),
       history: [...history].sort(
@@ -52,46 +48,34 @@ export class TrackingService {
     };
   }
 
-  async addUpdate(
-    trackingNo: string,
-    status: ShipmentStatus,
-    location: string | null,
-    source: TrackingSource = TrackingSource.DRIVER,
-  ): Promise<TrackingUpdate> {
-    const shipment = await this.shipmentRepository.findByTrackingNo(trackingNo.trim());
+  async addTrackingUpdate(input: {
+    trackingNo: string;
+    status: ShipmentStatus;
+    location: string;
+    source?: TrackingSource;
+  }): Promise<{ success: boolean; update?: TrackingUpdate; error?: string }> {
+    const shipment = await this.shipmentRepository.findByTrackingNo(input.trackingNo.trim());
     if (!shipment) {
-      throw new Error('Mã theo dõi không tồn tại.');
+      return { success: false, error: 'Mã theo dõi không tồn tại.' };
     }
 
-    // A null GPS location means the external GPS adapter is unavailable.
-    // Shipment.addTrackingUpdate() deliberately falls back to its last known location.
-    const update = shipment.addTrackingUpdate(status, location, source);
+    try {
+      const update = shipment.addTrackingUpdate(
+        input.status,
+        input.location,
+        input.source || TrackingSource.DRIVER,
+      );
 
-    if (this.trackingUpdateRepository) {
-      await this.trackingUpdateRepository.save(update);
+      await this.shipmentRepository.save(shipment);
+
+      // Notify real-time observers (Observer Pattern)
+      if (this.trackingNotifier) {
+        this.trackingNotifier.notifyObservers(update);
+      }
+
+      return { success: true, update };
+    } catch (err: any) {
+      return { success: false, error: err.message || 'Cập nhật thất bại.' };
     }
-    await this.shipmentRepository.save(shipment);
-
-    if (this.trackingNotifier) {
-      await this.trackingNotifier.notifyObservers(shipment.id, update);
-    }
-
-    return update;
-  }
-
-  /** Convenience method for reconstructing an update when importing legacy data. */
-  createUpdate(
-    shipmentId: string,
-    status: ShipmentStatus,
-    location: string,
-    source: TrackingSource = TrackingSource.DRIVER,
-  ): TrackingUpdate {
-    return new TrackingUpdate(
-      generateId('TRK-UPD'),
-      shipmentId,
-      status,
-      location,
-      source,
-    );
   }
 }

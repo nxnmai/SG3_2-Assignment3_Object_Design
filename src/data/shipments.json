@@ -1,1 +1,25 @@
-[]
+[
+  {
+    "id": "SHP-001",
+    "orderId": "ORD-001",
+    "trackingNo": "TRK-001",
+    "origin": "BR-HCM",
+    "destination": "BR-HN",
+    "weight": 10,
+    "volume": 0.8,
+    "requiredVehicleType": "VAN",
+    "status": "UNASSIGNED",
+    "currentLocation": "BR-HCM",
+    "lastUpdated": "2026-08-05T01:21:29.669Z",
+    "trackingUpdates": [
+      {
+        "id": "TRK-UPD-001",
+        "shipmentId": "SHP-001",
+        "status": "UNASSIGNED",
+        "location": "BR-HCM",
+        "source": "SYSTEM",
+        "timestamp": "2026-08-05T01:21:29.669Z"
+      }
+    ]
+  }
+]

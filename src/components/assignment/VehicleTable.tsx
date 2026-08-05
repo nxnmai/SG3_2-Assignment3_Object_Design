@@ -1,7 +1,7 @@
 'use client'
 
 import { Truck } from 'lucide-react'
-import { Vehicle } from '@/domain/Vehicle'
+import { Vehicle } from '../../domain/Vehicle'
 import VehicleRow from './VehicleRow'
 
 interface VehicleTableProps {

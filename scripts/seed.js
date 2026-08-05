@@ -1,7 +1,7 @@
-import fs from 'fs';
-import path from 'path';
+const fs = require('fs');
+const path = require('path');
 
-const DATA_DIR = path.join(process.cwd(), 'src', 'data');
+const DATA_DIR = path.join(__dirname, '..', 'src', 'data');
 
 const sampleBranches = [
   { id: 'BR-HCM', name: 'Chi nhánh Hồ Chí Minh', address: '123 Nguyễn Huệ, Quận 1, TP.HCM', vehicleIds: ['VEH-001', 'VEH-002'], staffIds: ['STF-001'], driverIds: ['STF-D01', 'STF-D02'] },
@@ -134,15 +134,15 @@ const sampleShipments = [
   },
 ];
 
-const samplePayments: any[] = [];
+const samplePayments = [];
 
-function writeJson(filename: string, data: any) {
+function writeJson(filename, data) {
   const filePath = path.join(DATA_DIR, filename);
   fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf-8');
   console.log(`Seeded ${filename} (${data.length} records)`);
 }
 
-export function runSeed() {
+function runSeed() {
   if (!fs.existsSync(DATA_DIR)) {
     fs.mkdirSync(DATA_DIR, { recursive: true });
   }
@@ -160,6 +160,4 @@ export function runSeed() {
   console.log('✅ Seed data successfully initialized!');
 }
 
-if (require.main === module) {
-  runSeed();
-}
+runSeed();

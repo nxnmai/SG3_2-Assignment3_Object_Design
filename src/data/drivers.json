@@ -1,109 +1,57 @@
 [
-    {
-        "id": "STF-010",
-        "branchId": "BR-HCM",
-        "name": "Pham Van Long",
-        "phone": "0911000001",
-        "email": "long@smartfm.vn",
-        "role": "DRIVER",
-        "credentials": {
-            "username": "longhcm04",
-            "password": "password123"
-        },
-        "licenseExpiry": "2028-12-31T00:00:00.000Z",
-        "vehicleTypes": ["TRUCK_2T"],
-        "status": "AVAILABLE"
+  {
+    "id": "STF-D01",
+    "branchId": "BR-HCM",
+    "name": "Nguyễn Văn Tài (Tài Xế)",
+    "phone": "0909123456",
+    "email": "driver1@smartfm.vn",
+    "role": "DRIVER",
+    "credentials": {
+      "username": "driver1",
+      "password": "123"
     },
-    {
-        "id": "STF-011",
-        "branchId": "BR-HCM",
-        "name": "Nguyen Quoc Hung",
-        "phone": "0911000002",
-        "email": "hung@smartfm.vn",
-        "role": "DRIVER",
-        "credentials": {
-            "username": "hunghcm05",
-            "password": "password123"
-        },
-        "licenseExpiry": "2029-06-30T00:00:00.000Z",
-        "vehicleTypes": ["VAN"],
-        "status": "AVAILABLE"
+    "licenseExpiry": "2028-12-31T00:00:00.000Z",
+    "vehicleTypes": [
+      "TRUCK_5T",
+      "TRUCK_2T",
+      "VAN"
+    ],
+    "status": "AVAILABLE"
+  },
+  {
+    "id": "STF-D02",
+    "branchId": "BR-HCM",
+    "name": "Lê Văn Lái (Tài Xế)",
+    "phone": "0909654321",
+    "email": "driver2@smartfm.vn",
+    "role": "DRIVER",
+    "credentials": {
+      "username": "driver2",
+      "password": "123"
     },
-    {
-        "id": "STF-012",
-        "branchId": "BR-HCM",
-        "name": "Le Thanh Son",
-        "phone": "0911000003",
-        "email": "son@smartfm.vn",
-        "role": "DRIVER",
-        "credentials": {
-            "username": "sonhcm06",
-            "password": "password123"
-        },
-        "licenseExpiry": "2028-09-15T00:00:00.000Z",
-        "vehicleTypes": ["MOTORBIKE"],
-        "status": "IN_USE",
-        "assignedVehicle": "VEH-003",
-        "assignedShipmentId": "SHP-001"
+    "licenseExpiry": "2027-06-30T00:00:00.000Z",
+    "vehicleTypes": [
+      "VAN",
+      "MOTORBIKE"
+    ],
+    "status": "AVAILABLE"
+  },
+  {
+    "id": "STF-D03",
+    "branchId": "BR-HN",
+    "name": "Phạm Văn Chạy (Tài Xế)",
+    "phone": "0912345678",
+    "email": "driver3@smartfm.vn",
+    "role": "DRIVER",
+    "credentials": {
+      "username": "driver3",
+      "password": "123"
     },
-    {
-        "id": "STF-013",
-        "branchId": "BR-HN",
-        "name": "Tran Minh Duc",
-        "phone": "0912000001",
-        "email": "duc@smartfm.vn",
-        "role": "DRIVER",
-        "credentials": {
-            "username": "duchn04",
-            "password": "password123"
-        },
-        "licenseExpiry": "2029-11-20T00:00:00.000Z",
-        "vehicleTypes": ["TRUCK_5T"],
-        "status": "AVAILABLE"
-    },
-    {
-        "id": "STF-014",
-        "branchId": "BR-HN",
-        "name": "Vo Hoang Nam",
-        "phone": "0912000002",
-        "email": "nam@smartfm.vn",
-        "role": "DRIVER",
-        "credentials": {
-            "username": "namhn05",
-            "password": "password123"
-        },
-        "licenseExpiry": "2027-08-10T00:00:00.000Z",
-        "vehicleTypes": ["VAN"],
-        "status": "UNAVAILABLE"
-    },
-    {
-        "id": "STF-015",
-        "branchId": "BR-DN",
-        "name": "Dang Gia Bao",
-        "phone": "0913000001",
-        "email": "bao@smartfm.vn",
-        "role": "DRIVER",
-        "credentials": {
-            "username": "baodn04",
-            "password": "password123"
-        },
-        "licenseExpiry": "2028-05-25T00:00:00.000Z",
-        "vehicleTypes": ["TRUCK_2T"],
-        "status": "AVAILABLE"
-    },
-    {
-        "id": "STF-016",
-        "branchId": "BR-DN",
-        "name": "Bui Van Kiet",
-        "phone": "0913000002",
-        "email": "kiet@smartfm.vn",
-        "role": "DRIVER",
-        "credentials": {
-            "username": "kietdn05",
-            "password": "password123"
-        },
-        "licenseExpiry": "2029-03-18T00:00:00.000Z",
-        "vehicleTypes": ["MOTORBIKE"],
-        "status": "AVAILABLE"
-    }
+    "licenseExpiry": "2029-01-15T00:00:00.000Z",
+    "vehicleTypes": [
+      "TRUCK_2T",
+      "VAN"
+    ],
+    "status": "AVAILABLE"
+  }
 ]

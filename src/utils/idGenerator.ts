@@ -1,3 +1,4 @@
 export function generateId(prefix: string): string {
-  return `${prefix}-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+  const random = Math.floor(100000 + Math.random() * 900000);
+  return `${prefix}-${random}`;
 }

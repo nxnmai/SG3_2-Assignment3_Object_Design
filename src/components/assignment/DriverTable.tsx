@@ -2,7 +2,7 @@
 
 import { User } from 'lucide-react'
 
-import { Driver } from '@/domain/Driver'
+import { Driver } from '../../domain/Driver'
 import DriverRow from './DriverRow'
 
 interface DriverTableProps {

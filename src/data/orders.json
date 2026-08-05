@@ -1,1 +1,16 @@
-[]
+[
+  {
+    "id": "ORD-001",
+    "customerId": "CUST-001",
+    "offeringId": "OFF-STD",
+    "goodsDescription": "2 thùng máy tính để bàn",
+    "origin": "BR-HCM",
+    "destination": "BR-HN",
+    "weight": 10,
+    "volume": 0.8,
+    "requiredVehicleType": "VAN",
+    "status": "PENDING_PAYMENT",
+    "totalAmount": 250000,
+    "createdAt": "2026-08-05T01:21:29.669Z"
+  }
+]

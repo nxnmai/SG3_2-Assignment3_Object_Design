@@ -1,56 +1,13 @@
 [
-    {
-        "id": "CUST-001",
-        "name": "Nguyen Minh Anh",
-        "phone": "0905000001",
-        "email": "minhanh@gmail.com",
-        "address": "12 Nguyen Hue, District 1, Ho Chi Minh City",
-        "createdAt": "2026-08-05T09:00:00.000Z",
-        "orderIds": []
-    },
-    {
-        "id": "CUST-002",
-        "name": "Tran Thi Mai",
-        "phone": "0905000002",
-        "email": "tranmai@yahoo.com",
-        "address": "45 Le Loi, Hai Chau, Da Nang",
-        "createdAt": "2026-08-05T09:10:00.000Z",
-        "orderIds": []
-    },
-    {
-        "id": "CUST-003",
-        "name": "Le Quoc Bao",
-        "phone": "0905000003",
-        "email": "bao.le@gmail.com",
-        "address": "89 Tran Hung Dao, Hoan Kiem, Ha Noi",
-        "createdAt": "2026-08-05T09:20:00.000Z",
-        "orderIds": []
-    },
-    {
-        "id": "CUST-004",
-        "name": "Pham Thu Ha",
-        "phone": "0905000004",
-        "email": "phamthuha@gmail.com",
-        "address": "102 Cach Mang Thang Tam, District 3, Ho Chi Minh City",
-        "createdAt": "2026-08-05T09:30:00.000Z",
-        "orderIds": []
-    },
-    {
-        "id": "CUST-005",
-        "name": "Vo Thanh Tung",
-        "phone": "0905000005",
-        "email": "tung.vo@outlook.com",
-        "address": "27 Bach Dang, Hai Chau, Da Nang",
-        "createdAt": "2026-08-05T09:40:00.000Z",
-        "orderIds": []
-    },
-    {
-        "id": "CUST-006",
-        "name": "Dang Ngoc Linh",
-        "phone": "0905000006",
-        "email": "linh.dang@gmail.com",
-        "address": "156 Kim Ma, Ba Dinh, Ha Noi",
-        "createdAt": "2026-08-05T09:50:00.000Z",
-        "orderIds": []
-    }
+  {
+    "id": "CUST-001",
+    "name": "Nguyễn Văn A",
+    "phone": "0901234567",
+    "email": "customer@example.com",
+    "address": "123 Nguyễn Huệ, Quận 1, TP.HCM",
+    "orderIds": [
+      "ORD-001"
+    ],
+    "createdAt": "2026-08-05T01:21:29.669Z"
+  }
 ]

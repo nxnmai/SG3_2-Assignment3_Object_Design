@@ -10,7 +10,7 @@ import {
 import {
   Driver,
   DriverStatus,
-} from '@/domain/Driver'
+} from '../../domain/Driver'
 
 interface DriverRowProps {
   driver: Driver

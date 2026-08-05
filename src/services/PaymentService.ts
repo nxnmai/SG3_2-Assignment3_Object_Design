@@ -2,6 +2,8 @@
 
 import { Payment, PaymentMethod, PaymentStatus } from '../domain/Payment';
 import { PaymentRepository } from '../repositories/PaymentRepository';
+import { InvoiceRepository } from '../repositories/InvoiceRepository';
+import { PaymentStrategyFactory } from '../domain/PaymentStrategy';
 import { generateId } from '../utils/idGenerator';
 
 export interface InvoiceLike {
@@ -9,13 +11,9 @@ export interface InvoiceLike {
   getTotal(): number;
   getBalance(): number;
   isPaid(): boolean;
-  addPayment(payment: Payment): void;
-  generateReceipt(): string;
-}
-
-export interface InvoiceRepositoryLike {
-  findById(id: string): Promise<InvoiceLike | undefined>;
-  save(invoice: InvoiceLike): Promise<void>;
+  addPayment?(payment: Payment): void;
+  recordPayment(amount: number, isDeposit?: boolean): number;
+  generateReceipt?(): string;
 }
 
 export interface PaymentMetadata {
@@ -26,18 +24,20 @@ export interface PaymentMetadata {
 }
 
 export interface PaymentConfirmation {
-  payment: Payment;
+  success: boolean;
+  payment?: Payment;
   receiptMessage: string;
   balance: number;
+  error?: string;
 }
 
 export class PaymentService {
   constructor(
-    private readonly paymentRepository: PaymentRepository,
-    private readonly invoiceRepository: InvoiceRepositoryLike,
+    private readonly paymentRepository: PaymentRepository = new PaymentRepository(),
+    private readonly invoiceRepository: InvoiceRepository = new InvoiceRepository(),
   ) {}
 
-  async getInvoice(invoiceId: string): Promise<InvoiceLike> {
+  async getInvoice(invoiceId: string): Promise<any> {
     if (!invoiceId.trim()) throw new Error('Invoice ID cannot be empty.');
 
     const invoice = await this.invoiceRepository.findById(invoiceId);
@@ -52,93 +52,72 @@ export class PaymentService {
   ): Promise<PaymentConfirmation> {
     const invoice = await this.getInvoice(invoiceId);
 
-    if (invoice.isPaid()) {
-      throw new Error('Hóa đơn đã thanh toán.');
+    if (invoice.isFullyPaid && invoice.isFullyPaid()) {
+      throw new Error('Hóa đơn này đã được thanh toán hoàn tất.');
     }
 
-    const balance = invoice.getBalance();
-    if (!Number.isFinite(balance) || balance <= 0) {
-      throw new Error('Hóa đơn không có số tiền cần thanh toán.');
+    const currentBalance = invoice.getBalance ? invoice.getBalance() : invoice.totalAmount - (invoice.paidAmount || 0);
+    const amountToPay = metadata.amount && metadata.amount > 0 ? metadata.amount : currentBalance;
+
+    if (!Number.isFinite(amountToPay) || amountToPay <= 0) {
+      throw new Error('Số tiền không hợp lệ. Vui lòng nhập số tiền lớn hơn 0.');
     }
 
-    const amount = metadata.amount ?? balance;
-    if (!Number.isFinite(amount) || amount <= 0) {
-      throw new Error('Số tiền thanh toán phải lớn hơn 0.');
-    }
-    if (amount > balance) {
-      throw new Error('Số tiền thanh toán không được vượt quá số dư hóa đơn.');
+    // Process via Strategy Pattern
+    const strategy = PaymentStrategyFactory.create(method);
+    const strategyResult = await strategy.process(amountToPay, metadata);
+
+    if (!strategyResult.success) {
+      return {
+        success: false,
+        receiptMessage: '',
+        balance: currentBalance,
+        error: strategyResult.error || 'Thanh toán thất bại.',
+      };
     }
 
-    const result = this.processSimulatedPayment(method, metadata);
     const payment = new Payment(
       generateId('PAY'),
-      invoiceId,
+      invoice.id,
       method,
-      amount,
-      result.transactionRef,
-      result.success ? PaymentStatus.SUCCESS : PaymentStatus.FAILED,
-      result.error,
-      metadata.isDeposit ?? amount < invoice.getTotal(),
+      amountToPay,
+      strategyResult.transactionRef,
+      PaymentStatus.SUCCESS,
+      undefined,
+      metadata.isDeposit || false,
+      new Date(),
     );
 
     await this.paymentRepository.save(payment);
 
-    if (!payment.isSuccess()) {
-      throw new Error(result.error ?? 'Thanh toán thất bại. Vui lòng thử lại.');
+    if (invoice.recordPayment) {
+      invoice.recordPayment(amountToPay, metadata.isDeposit || false);
+      await this.invoiceRepository.save(invoice);
     }
 
-    invoice.addPayment(payment);
-    await this.invoiceRepository.save(invoice);
-
-    const newBalance = invoice.getBalance();
-    const receiptMessage =
-            invoice.generateReceipt() ||
-            `Thanh toán ${amount.toLocaleString('vi-VN')} VND thành công`;
+    const remainingBalance = invoice.getBalance ? invoice.getBalance() : 0;
 
     return {
+      success: true,
       payment,
-      receiptMessage,
-      balance: newBalance,
+      receiptMessage: `Thanh toán thành công ${amountToPay.toLocaleString()} VND qua ${payment.getMethodLabel()}. Mã giao dịch: ${strategyResult.transactionRef}.`,
+      balance: remainingBalance,
     };
   }
 
-  private processSimulatedPayment(
-    method: PaymentMethod,
-    metadata: PaymentMetadata,
-  ): { success: boolean; transactionRef?: string; error?: string } {
-    switch (method) {
-      case PaymentMethod.CASH:
-        return {
-          success: true,
-          transactionRef: `CASH-${Date.now()}`,
-        };
-
-      case PaymentMethod.BANK_TRANSFER:
-        return {
-          success: true,
-          transactionRef: metadata.reference?.trim() || `BANK-${Date.now()}`,
-        };
-
-      case PaymentMethod.CARD: {
-        const token = metadata.cardToken?.trim();
-        if (!token) {
-          return { success: false, error: 'Thẻ không hợp lệ' };
-        }
-        if (token.toLowerCase() === 'expired') {
-          return { success: false, error: 'Thẻ hết hạn' };
-        }
-        if (token.toLowerCase() === 'invalid') {
-          return { success: false, error: 'Thẻ không hợp lệ' };
-        }
-        return {
-          success: true,
-          transactionRef: `CARD-${Date.now()}`,
-        };
-      }
-
-      default:
-        return { success: false, error: 'Phương thức thanh toán không hợp lệ.' };
-    }
+  async processPayment(input: {
+    invoiceId: string;
+    amount: number;
+    method: PaymentMethod;
+    cardToken?: string;
+    reference?: string;
+    isDeposit?: boolean;
+  }): Promise<PaymentConfirmation> {
+    return this.pay(input.invoiceId, input.method, {
+      amount: input.amount,
+      cardToken: input.cardToken,
+      reference: input.reference,
+      isDeposit: input.isDeposit,
+    });
   }
 }
-

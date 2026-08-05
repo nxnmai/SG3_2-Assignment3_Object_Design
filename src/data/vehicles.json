@@ -1,59 +1,42 @@
 [
-    {
-        "id": "VEH-001",
-        "branchId": "BR-HCM",
-        "type": "TRUCK_2T",
-        "capacityKg": 2000,
-        "capacityVolumeM3": 12,
-        "status": "AVAILABLE"
-    },
-    {
-        "id": "VEH-002",
-        "branchId": "BR-HCM",
-        "type": "VAN",
-        "capacityKg": 1000,
-        "capacityVolumeM3": 6,
-        "status": "AVAILABLE"
-    },
-    {
-        "id": "VEH-003",
-        "branchId": "BR-HCM",
-        "type": "MOTORBIKE",
-        "capacityKg": 80,
-        "capacityVolumeM3": 0.5,
-        "status": "IN_USE",
-        "assignedShipmentId": "SHP-001"
-    },
-    {
-        "id": "VEH-004",
-        "branchId": "BR-HN",
-        "type": "TRUCK_5T",
-        "capacityKg": 5000,
-        "capacityVolumeM3": 28,
-        "status": "AVAILABLE"
-    },
-    {
-        "id": "VEH-005",
-        "branchId": "BR-HN",
-        "type": "VAN",
-        "capacityKg": 1200,
-        "capacityVolumeM3": 7,
-        "status": "MAINTENANCE"
-    },
-    {
-        "id": "VEH-006",
-        "branchId": "BR-DN",
-        "type": "TRUCK_2T",
-        "capacityKg": 2000,
-        "capacityVolumeM3": 12,
-        "status": "AVAILABLE"
-    },
-    {
-        "id": "VEH-007",
-        "branchId": "BR-DN",
-        "type": "MOTORBIKE",
-        "capacityKg": 80,
-        "capacityVolumeM3": 0.5,
-        "status": "AVAILABLE"
-    }
+  {
+    "id": "VEH-001",
+    "branchId": "BR-HCM",
+    "type": "TRUCK_5T",
+    "capacityKg": 5000,
+    "capacityVolumeM3": 20,
+    "status": "AVAILABLE"
+  },
+  {
+    "id": "VEH-002",
+    "branchId": "BR-HCM",
+    "type": "VAN",
+    "capacityKg": 1000,
+    "capacityVolumeM3": 5,
+    "status": "AVAILABLE"
+  },
+  {
+    "id": "VEH-003",
+    "branchId": "BR-HN",
+    "type": "TRUCK_2T",
+    "capacityKg": 2000,
+    "capacityVolumeM3": 10,
+    "status": "AVAILABLE"
+  },
+  {
+    "id": "VEH-004",
+    "branchId": "BR-HN",
+    "type": "VAN",
+    "capacityKg": 1000,
+    "capacityVolumeM3": 5,
+    "status": "AVAILABLE"
+  },
+  {
+    "id": "VEH-005",
+    "branchId": "BR-DN",
+    "type": "MOTORBIKE",
+    "capacityKg": 100,
+    "capacityVolumeM3": 0.5,
+    "status": "AVAILABLE"
+  }
 ]

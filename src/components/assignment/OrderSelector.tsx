@@ -1,19 +1,12 @@
 'use client'
 
 import { Package, Route, Search } from 'lucide-react'
-
-interface Order {
-  id: string
-  destination: string
-  weight: number
-  volume: number
-  requiredVehicle: string
-}
+import { Shipment } from '../../domain/Shipment'
 
 interface OrderSelectorProps {
-  orders?: Order[]
-  selectedOrder?: Order
-  onSelect?: (order: Order) => void
+  orders?: any[]
+  selectedOrder?: any
+  onSelect?: (order: any) => void
 }
 
 export default function OrderSelector({
@@ -113,7 +106,7 @@ export default function OrderSelector({
                       </p>
 
                       <p className="mt-1 font-medium">
-                        {order.requiredVehicle.replaceAll('_', ' ')}
+                        {(order.requiredVehicle || order.requiredVehicleType || 'VAN').replaceAll('_', ' ')}
                       </p>
                     </div>
 

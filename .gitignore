@@ -1,9 +1,43 @@
+# Dependencies
 node_modules/
+/.pnp
+.pnp.js
+
+# Next.js build outputs
 .next/
+/out/
+/build/
+/dist/
+/coverage/
+
+# Generated runtime & seed data files (populated via `npm run seed`)
+src/data/*.json
+!src/data/.gitkeep
+
+# Auto-generated AI agent helper files
+AGENTS.md
+CLAUDE.md
+
+# Environment files
 .env
 .env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Debug logs
 *.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS and Editor files
 .DS_Store
-dist/
-build/
-coverage/
+Thumbs.db
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp

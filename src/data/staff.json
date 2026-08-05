@@ -1,110 +1,14 @@
 [
-    {
-        "id": "STF-001",
-        "branchId": "BR-HCM",
-        "name": "Nguyen Van An",
-        "phone": "0901000001",
-        "email": "an.hcm@smartfm.vn",
-        "role": "BRANCH_STAFF",
-        "credentials": {
-            "username": "anhcm01",
-            "password": "password123"
-        }
-    },
-    {
-        "id": "STF-002",
-        "branchId": "BR-HCM",
-        "name": "Tran Thi Binh",
-        "phone": "0901000002",
-        "email": "binh.hcm@smartfm.vn",
-        "role": "OPERATIONS_MANAGER",
-        "credentials": {
-            "username": "binhhcm02",
-            "password": "password123"
-        }
-    },
-    {
-        "id": "STF-003",
-        "branchId": "BR-HCM",
-        "name": "Le Quoc Cuong",
-        "phone": "0901000003",
-        "email": "cuong.hcm@smartfm.vn",
-        "role": "ADMIN",
-        "credentials": {
-            "username": "cuonghcm03",
-            "password": "password123"
-        }
-    },
-    {
-        "id": "STF-004",
-        "branchId": "BR-HN",
-        "name": "Pham Minh Duc",
-        "phone": "0902000001",
-        "email": "duc.hn@smartfm.vn",
-        "role": "BRANCH_STAFF",
-        "credentials": {
-            "username": "duchn01",
-            "password": "password123"
-        }
-    },
-    {
-        "id": "STF-005",
-        "branchId": "BR-HN",
-        "name": "Vu Thi Giang",
-        "phone": "0902000002",
-        "email": "giang.hn@smartfm.vn",
-        "role": "OPERATIONS_MANAGER",
-        "credentials": {
-            "username": "gianghn02",
-            "password": "password123"
-        }
-    },
-    {
-        "id": "STF-006",
-        "branchId": "BR-HN",
-        "name": "Do Van Hai",
-        "phone": "0902000003",
-        "email": "hai.hn@smartfm.vn",
-        "role": "ADMIN",
-        "credentials": {
-            "username": "haihn03",
-            "password": "password123"
-        }
-    },
-    {
-        "id": "STF-007",
-        "branchId": "BR-DN",
-        "name": "Bui Thanh Khoa",
-        "phone": "0903000001",
-        "email": "khoa.dn@smartfm.vn",
-        "role": "BRANCH_STAFF",
-        "credentials": {
-            "username": "khoadn03",
-            "password": "password123"
-        }
-    },
-    {
-        "id": "STF-008",
-        "branchId": "BR-DN",
-        "name": "Dang Thi Lan",
-        "phone": "0903000002",
-        "email": "lan.dn@smartfm.vn",
-        "role": "OPERATIONS_MANAGER",
-        "credentials": {
-            "username": "landn03",
-            "password": "password123"
-        }
-    },
-    {
-        "id": "STF-009",
-        "branchId": "BR-DN",
-        "name": "Hoang Gia Minh",
-        "phone": "0903000003",
-        "email": "minh.dn@smartfm.vn",
-        "role": "ADMIN",
-        "credentials": {
-            "username": "minhdn03",
-            "password": "password123"
-        }
+  {
+    "id": "STF-001",
+    "branchId": "BR-HCM",
+    "name": "Trần Thị Thu (Nhân Viên Chi Nhánh)",
+    "phone": "0988776655",
+    "email": "staff1@smartfm.vn",
+    "role": "BRANCH_STAFF",
+    "credentials": {
+      "username": "staff1",
+      "password": "123"
     }
+  }
 ]
