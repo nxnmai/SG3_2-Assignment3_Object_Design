@@ -3,6 +3,10 @@
 import { Payment, PaymentMethod, PaymentStatus } from '../domain/Payment';
 import { PaymentRepository } from '../repositories/PaymentRepository';
 import { InvoiceRepository } from '../repositories/InvoiceRepository';
+import { OrderRepository } from '../repositories/OrderRepository';
+import { ShipmentRepository } from '../repositories/ShipmentRepository';
+import { OrderStatus } from '../domain/Order';
+import { ShipmentStatus } from '../domain/Shipment';
 import { PaymentStrategyFactory } from '../domain/PaymentStrategy';
 import { generateId } from '../utils/idGenerator';
 
@@ -35,6 +39,8 @@ export class PaymentService {
   constructor(
     private readonly paymentRepository: PaymentRepository = new PaymentRepository(),
     private readonly invoiceRepository: InvoiceRepository = new InvoiceRepository(),
+    private readonly orderRepository: OrderRepository = new OrderRepository(),
+    private readonly shipmentRepository: ShipmentRepository = new ShipmentRepository(),
   ) {}
 
   async getInvoice(invoiceId: string): Promise<any> {
@@ -93,6 +99,29 @@ export class PaymentService {
     if (invoice.recordPayment) {
       invoice.recordPayment(amountToPay, metadata.isDeposit || false);
       await this.invoiceRepository.save(invoice);
+    }
+
+    // Update associated Order status
+    try {
+      const order = await this.orderRepository.findById(invoice.orderId);
+      if (order) {
+        order.status = invoice.isFullyPaid() ? OrderStatus.PAID : OrderStatus.PENDING_PAYMENT;
+        await this.orderRepository.save(order);
+      }
+    } catch (e) {
+      // Ignore secondary update errors
+    }
+
+    // Update associated Shipment status to UNASSIGNED so it appears in U4 Resource Assignment
+    try {
+      const shipments = await this.shipmentRepository.findAll();
+      const shipment = shipments.find((s) => s.orderId === invoice.orderId);
+      if (shipment) {
+        shipment.status = ShipmentStatus.UNASSIGNED;
+        await this.shipmentRepository.save(shipment);
+      }
+    } catch (e) {
+      // Ignore secondary update errors
     }
 
     const remainingBalance = invoice.getBalance ? invoice.getBalance() : 0;

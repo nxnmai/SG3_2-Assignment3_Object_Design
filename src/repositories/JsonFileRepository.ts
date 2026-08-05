@@ -1,6 +1,33 @@
 import { IRepository } from './IRepository';
+import defaultBranches from '../data/branches.json';
+import defaultVehicles from '../data/vehicles.json';
+import defaultDrivers from '../data/drivers.json';
+import defaultStaff from '../data/staff.json';
+import defaultCustomers from '../data/customers.json';
+import defaultOrders from '../data/orders.json';
+import defaultInvoices from '../data/invoices.json';
+import defaultShipments from '../data/shipments.json';
 
-// Generic JSON-file-backed repository with browser memory fallback.
+const DEFAULT_DATA_MAP: Record<string, any[]> = {
+  'src/data/branches.json': defaultBranches,
+  'branches.json': defaultBranches,
+  'src/data/vehicles.json': defaultVehicles,
+  'vehicles.json': defaultVehicles,
+  'src/data/drivers.json': defaultDrivers,
+  'drivers.json': defaultDrivers,
+  'src/data/staff.json': defaultStaff,
+  'staff.json': defaultStaff,
+  'src/data/customers.json': defaultCustomers,
+  'customers.json': defaultCustomers,
+  'src/data/orders.json': defaultOrders,
+  'orders.json': defaultOrders,
+  'src/data/invoices.json': defaultInvoices,
+  'invoices.json': defaultInvoices,
+  'src/data/shipments.json': defaultShipments,
+  'shipments.json': defaultShipments,
+};
+
+// Generic JSON-file-backed repository with browser memory & fallback data.
 export class JsonFileRepository<T extends { id: string }> implements IRepository<T> {
   private inMemoryItems: Map<string, T[]> = new Map();
 
@@ -15,10 +42,12 @@ export class JsonFileRepository<T extends { id: string }> implements IRepository
         const raw = await fs.readFile(absolutePath, 'utf-8');
         return JSON.parse(raw) as T[];
       } catch (err) {
-        return this.inMemoryItems.get(this.filePath) || [];
+        const inMem = this.inMemoryItems.get(this.filePath);
+        if (inMem && inMem.length > 0) return inMem;
+        return (DEFAULT_DATA_MAP[this.filePath] as T[]) || [];
       }
     } else {
-      // Browser environment: use localStorage or in-memory map fallback
+      // Browser environment: use localStorage or default data map fallback
       try {
         const key = `smartfm_${this.filePath}`;
         const stored = localStorage.getItem(key);
@@ -26,7 +55,9 @@ export class JsonFileRepository<T extends { id: string }> implements IRepository
       } catch (e) {
         // Fallback
       }
-      return this.inMemoryItems.get(this.filePath) || [];
+      const inMem = this.inMemoryItems.get(this.filePath);
+      if (inMem && inMem.length > 0) return inMem;
+      return (DEFAULT_DATA_MAP[this.filePath] as T[]) || [];
     }
   }
 

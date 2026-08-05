@@ -29,8 +29,14 @@ export function useAssignment(props?: UseAssignmentProps) {
     setLoading(true)
     setError('')
     try {
-      const unassigned = await assignmentService.findUnassignedShipments()
+      const [unassigned, allVehicles, allDrivers] = await Promise.all([
+        assignmentService.findUnassignedShipments(),
+        assignmentService.findAllVehicles(),
+        assignmentService.findAllDrivers(),
+      ])
       setShipments(unassigned)
+      setVehicles(allVehicles)
+      setDrivers(allDrivers)
     } catch (err: any) {
       setError(err.message || 'Failed to load assignment data.')
     } finally {
@@ -43,14 +49,25 @@ export function useAssignment(props?: UseAssignmentProps) {
   }, [])
 
   const recommendedVehicles = useMemo(() => {
-    if (!selectedShipment) return vehicles
-    return vehicles.filter(v => v.isAvailable() && v.canCarry(selectedShipment.weight, selectedShipment.volume))
+    const available = vehicles.filter(v => v.isAvailable())
+    if (!selectedShipment) return available.length > 0 ? available : vehicles
+
+    const matches = available.filter(v => v.canCarry(selectedShipment.weight, selectedShipment.volume || 0))
+    return matches.length > 0 ? matches : (available.length > 0 ? available : vehicles)
   }, [selectedShipment, vehicles])
 
   const recommendedDrivers = useMemo(() => {
-    if (!selectedVehicle) return drivers
-    return drivers.filter(d => d.isAvailable() && d.isQualifiedFor(selectedVehicle.type))
-  }, [selectedVehicle, drivers])
+    const available = drivers.filter(d => d.isAvailable())
+    if (selectedVehicle) {
+      const matches = available.filter(d => d.isQualifiedFor(selectedVehicle.type))
+      return matches.length > 0 ? matches : (available.length > 0 ? available : drivers)
+    }
+    if (selectedShipment) {
+      const matches = available.filter(d => d.isQualifiedFor(selectedShipment.requiredVehicleType))
+      return matches.length > 0 ? matches : (available.length > 0 ? available : drivers)
+    }
+    return available.length > 0 ? available : drivers
+  }, [selectedShipment, selectedVehicle, drivers])
 
   const statistics = useMemo(() => ({
     pendingShipments: shipments.length,

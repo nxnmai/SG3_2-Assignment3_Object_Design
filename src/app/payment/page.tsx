@@ -26,8 +26,21 @@ function PaymentFormContent() {
   const [receipt, setReceipt] = useState<{ message: string; trackingNo?: string } | null>(null);
 
   useEffect(() => {
-    const queryInvoice = searchParams.get('invoiceId');
-    if (queryInvoice) setInvoiceId(queryInvoice);
+    const queryInvoice = searchParams.get('invoiceId') || invoiceId;
+    if (queryInvoice) {
+      setInvoiceId(queryInvoice);
+      paymentService
+        .getInvoice(queryInvoice)
+        .then((inv) => {
+          if (inv) {
+            const bal = inv.getBalance ? inv.getBalance() : inv.totalAmount;
+            setAmount(bal.toString());
+          }
+        })
+        .catch(() => {
+          // Keep default amount if invoice lookup is pending
+        });
+    }
   }, [searchParams]);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {

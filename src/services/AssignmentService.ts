@@ -18,6 +18,14 @@ export class AssignmentService {
         return this.shipmentRepository.findPaidUnassigned();
     }
 
+    async findAllVehicles(): Promise<Vehicle[]> {
+        return this.vehicleRepository.findAll();
+    }
+
+    async findAllDrivers(): Promise<Driver[]> {
+        return this.driverRepository.findAll();
+    }
+
     async recommendVehicles(
         branchId: string,
         shipment: Shipment

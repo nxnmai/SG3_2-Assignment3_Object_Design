@@ -10,7 +10,7 @@
     "requiredVehicleType": "VAN",
     "status": "UNASSIGNED",
     "currentLocation": "BR-HCM",
-    "lastUpdated": "2026-08-05T01:21:29.669Z",
+    "lastUpdated": "2026-08-05T11:05:50.892Z",
     "trackingUpdates": [
       {
         "id": "TRK-UPD-001",
@@ -18,7 +18,7 @@
         "status": "UNASSIGNED",
         "location": "BR-HCM",
         "source": "SYSTEM",
-        "timestamp": "2026-08-05T01:21:29.669Z"
+        "timestamp": "2026-08-05T11:05:50.892Z"
       }
     ]
   }

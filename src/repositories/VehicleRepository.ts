@@ -1,13 +1,36 @@
 import { JsonFileRepository } from "./JsonFileRepository";
 import {
     Vehicle,
-    VehicleType
+    VehicleType,
+    VehicleStatus
 } from "../domain/Vehicle";
 
-export class VehicleRepository extends JsonFileRepository<Vehicle> {
+export class VehicleRepository extends JsonFileRepository<Vehicle & { id: string }> {
 
     constructor() {
-        super("vehicles.json");
+        super("src/data/vehicles.json");
+    }
+
+    private hydrate(raw: any): Vehicle {
+        return new Vehicle(
+            raw.id,
+            raw.branchId,
+            raw.type as VehicleType,
+            raw.capacityKg,
+            raw.capacityVolumeM3,
+            raw.status as VehicleStatus,
+            raw.assignedShipmentId
+        );
+    }
+
+    public async findAll(): Promise<Vehicle[]> {
+        const items = await super.findAll();
+        return items.map((item) => this.hydrate(item));
+    }
+
+    public async findById(id: string): Promise<Vehicle | undefined> {
+        const item = await super.findById(id);
+        return item ? this.hydrate(item) : undefined;
     }
 
     public async findAvailableByType(branchId: string, type: VehicleType): Promise<Vehicle[]> {
