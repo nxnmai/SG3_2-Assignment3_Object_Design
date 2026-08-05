@@ -128,7 +128,7 @@ Run `npm run seed` in your terminal. Ensure the output confirms 9 datasets writt
 
 ## 📹 Video Demo & Submission Artifacts
 
-- **Video Demo**: A 3–5 minute screen recording demonstrating end-to-end execution of flows V1 through V4.
+- **Video Demo**: A ~3 minutes screen recording demonstrating end-to-end execution of flows V1 through V4.
 - **Report Document**: `docs/planning_temporary/working/Assignment 3 - Object Design Implementation and Reflection.pdf`
 - **Source Code**: Root repository `src/` directory.
 
